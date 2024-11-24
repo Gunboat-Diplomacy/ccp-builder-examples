@@ -18,7 +18,9 @@
     "test": "tsc --noEmit && mud test",
     "mock-data": ". ./.env && pnpm forge script ./script/MockData.s.sol:MockData --broadcast --rpc-url $RPC_URL --chain-id $CHAIN_ID --sig \"run(address)\" $WORLD_ADDRESS -vvv",
     "configure-smart-turret": ". ./.env && pnpm forge script ./script/ConfigureSmartTurret.s.sol:ConfigureSmartTurret --broadcast --rpc-url $RPC_URL --chain-id $CHAIN_ID --sig \"run(address)\" $WORLD_ADDRESS -vvv",
-    "execute": ". ./.env && pnpm forge script ./script/ExecuteInProximity.s.sol:ExecuteInProximity --broadcast --rpc-url $RPC_URL --chain-id $CHAIN_ID --sig \"run(address)\" $WORLD_ADDRESS -vvvv"
+    "execute": ". ./.env && pnpm forge script ./script/ExecuteInProximity.s.sol:ExecuteInProximity --broadcast --rpc-url $RPC_URL --chain-id $CHAIN_ID --sig \"run(address)\" $WORLD_ADDRESS -vvvv",
+    "erc20:register": ". ./.env && pnpm forge script ./script/ERC20Manager.s.sol:RegisterToken --broadcast --rpc-url $RPC_URL --chain-id $CHAIN_ID --sig \"run(address)\" $WORLD_ADDRESS -vvvv",
+    "erc20:mint": ". ./.env && pnpm forge script ./script/ERC20Manager.s.sol:MintTokens --broadcast --rpc-url $RPC_URL --chain-id $CHAIN_ID --sig \"run(address)\" $WORLD_ADDRESS -vvvv"
   },
   "dependencies": {
     "@latticexyz/cli": "2.2.14",
