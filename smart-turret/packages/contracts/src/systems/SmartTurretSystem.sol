@@ -44,11 +44,46 @@ contract SmartTurretSystem is System {
     Turret memory turret,
     SmartTurretTarget memory turretTarget
   ) public returns (TargetPriority[] memory updatedPriorityQueue) {
-    //TODO: Implement the logic
-    
-    if(true){
-      return priorityQueue;
+    uint256 turretTargetCorp = CharactersTable.getCorpId(turretTarget.characterId);
+    uint256 smartTurretOwnerCorp = CharactersTable.getCorpId(characterId);
+
+    if (turretTargetCorp == 98000004) {
+      // Reapers
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
     }
+
+    if (turretTargetCorp == 98000067) {
+      // Reapers II
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    if (turretTargetCorp == 98000104) {
+      // Reapers III
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    if (turretTargetCorp == smartTurretOwnerCorp) {
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    // we didn't early return so therefore we target
+    updatedPriorityQueue = new TargetPriority[](priorityQueue.length + 1);
+    for (uint256 i = 0; i < priorityQueue.length; i++) {
+      updatedPriorityQueue[i + 1] = priorityQueue[i];
+      return updatedPriorityQueue;
+    }
+
+    // should the weight be 1? or the heighest of all weights in the array ?
+    updatedPriorityQueue[0] = TargetPriority({ target: turretTarget, weight: 1 });
+    return updatedPriorityQueue;
   }
 
   /**
@@ -68,9 +103,46 @@ contract SmartTurretSystem is System {
     SmartTurretTarget memory aggressor,
     SmartTurretTarget memory victim
   ) public returns (TargetPriority[] memory updatedPriorityQueue) {
-    //TODO: Implement the logic
-    
-    return priorityQueue;
+    uint256 agressorCorp = CharactersTable.getCorpId(aggressor.characterId);
+    uint256 smartTurretOwnerCorp = CharactersTable.getCorpId(characterId);
+
+    if (agressorCorp == 98000004) {
+      // Reapers
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    if (agressorCorp == 98000067) {
+      // Reapers II
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    if (agressorCorp == 98000104) {
+      // Reapers III
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    if (agressorCorp == smartTurretOwnerCorp) {
+      // do not add to targeting
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
+
+    // we didn't early return so therefore we target
+    updatedPriorityQueue = new TargetPriority[](priorityQueue.length + 1);
+    for (uint256 i = 0; i < priorityQueue.length; i++) {
+      updatedPriorityQueue[i + 1] = priorityQueue[i];
+      return updatedPriorityQueue;
+    }
+
+    // should the weight be 1? or the heighest of all weights in the array ?
+    updatedPriorityQueue[0] = TargetPriority({ target: aggressor, weight: 1 });
+    return updatedPriorityQueue;
   }
 
   function _namespace() internal pure returns (bytes14 namespace) {

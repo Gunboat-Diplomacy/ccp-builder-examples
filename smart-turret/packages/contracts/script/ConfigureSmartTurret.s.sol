@@ -30,12 +30,18 @@ contract ConfigureSmartTurret is Script {
       namespace: FRONTIER_WORLD_DEPLOYMENT_NAMESPACE
     });
 
-    uint256 smartTurretId = vm.envUint("SMART_TURRET_ID");
-
     ResourceId systemId = Utils.smartTurretSystemId();
 
-    // This function can only be called by the owner of the smart turret
-    smartTurret.configureSmartTurret(smartTurretId, systemId);
+    uint256[] memory smartTurretIds;
+    smartTurretIds[0] = 90751117774793868817432120689828306901801996660537889025505233990272746082187; // Left "So Much For Subtlety"
+    smartTurretIds[1] = 11704671005735439463950973941874644084868982216748564838713575829882117304344; // Middle "Smart Turret Diplomat"
+    smartTurretIds[2] = 49240198130190626126447286418625368499371258892696229807313310414687671817084; // Right "Flexible Demeanour"
+
+    for (uint256 i = 0; i < smartTurretIds.length; i++) {
+      uint256 smartTurretId = smartTurretIds[i];
+      // This function can only be called by the owner of the smart turret
+      smartTurret.configureSmartTurret(smartTurretId, systemId);
+    }
 
     vm.stopBroadcast();
   }

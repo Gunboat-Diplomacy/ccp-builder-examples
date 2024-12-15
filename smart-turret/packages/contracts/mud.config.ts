@@ -1,7 +1,7 @@
 import { defineWorld } from "@latticexyz/world";
 
 export default defineWorld({
-  namespace: "test",
+  namespace: "scetrov_cqx",
   tables: {
   },
 });
