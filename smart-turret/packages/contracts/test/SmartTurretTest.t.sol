@@ -49,6 +49,11 @@ contract SmartTurretTest is MudTest {
 
   uint256 smartTurretId;
   uint256 testCharacterId = 11111;
+  uint256 testReapersCharacterId = 32123;
+  uint256 testCharacterId2 = 33333;
+  uint256 testCharacterId3 = 33333;
+  uint256 testCharacterId4 = 44444;
+  uint256 testCharacterId5 = 55555;
 
   //Setup for the tests
   function setUp() public override {
@@ -101,6 +106,34 @@ contract SmartTurretTest is MudTest {
       );
     }
 
+    // Create test characters with known corp IDs that aren’t blocked
+    smartCharacter.createCharacter(
+      testCharacterId,
+      address(0x111),
+      200005,
+      CharacterEntityRecord({ typeId: 123, itemId: 234, volume: 100 }),
+      EntityRecordOffchainTableData({ name: "testchar1", dappURL: "none", description: "test" }),
+      ""
+    );
+
+    smartCharacter.createCharacter(
+      testCharacterId2,
+      address(0x222),
+      200006,
+      CharacterEntityRecord({ typeId: 123, itemId: 234, volume: 100 }),
+      EntityRecordOffchainTableData({ name: "testchar2", dappURL: "none", description: "test" }),
+      ""
+    );
+
+    smartCharacter.createCharacter(
+      testReapersCharacterId,
+      address(0x333),
+      98000004, // Reapers
+      CharacterEntityRecord({ typeId: 123, itemId: 234, volume: 100 }),
+      EntityRecordOffchainTableData({ name: "reaperChar", dappURL: "none", description: "test" }),
+      ""
+    );
+
     smartTurretId = vm.envUint("SMART_TURRET_ID");
     createAnchorAndOnline(smartTurretId, admin);
   }
@@ -117,18 +150,28 @@ contract SmartTurretTest is MudTest {
 
   //Test inProximity
   function testInProximity() public {
-    //Execute inProximity view function and see what is returns
+    //Execute inProximity view function and see what it returns
     TargetPriority[] memory priorityQueue = new TargetPriority[](1);
     Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
     
     SmartTurretTarget memory turretTarget = SmartTurretTarget({
       shipId: 1,
       shipTypeId: 1,
-      characterId: testCharacterId,
+      characterId: testCharacterId3,
       hpRatio: 100,
       shieldRatio: 100,
       armorRatio: 100
     });
+
+      SmartTurretTarget memory turretTarget2 = SmartTurretTarget({
+      shipId: 2,
+      shipTypeId: 2,
+      characterId: testCharacterId2,
+      hpRatio: 100,
+      shieldRatio: 100,
+      armorRatio: 100
+    });
+
     priorityQueue[0] = TargetPriority({ target: turretTarget, weight: 100 });
 
     //Run inProximity
@@ -143,7 +186,9 @@ contract SmartTurretTest is MudTest {
       (TargetPriority[])
     );
 
-    assertEq(returnTargetQueue.length, 1, "Target length should equal 1");
+    assertEq(returnTargetQueue.length, 2, "Target length should now equal 2");
+    assertEq(returnTargetQueue[0].weight, 1, "New target is at the beginning of the queue and has weight 1");
+    assertEq(returnTargetQueue[1].weight, 100, "Old target should have shifted down");
   }
 
   //Test aggression
@@ -153,7 +198,7 @@ contract SmartTurretTest is MudTest {
     SmartTurretTarget memory turretTarget = SmartTurretTarget({
       shipId: 1,
       shipTypeId: 1,
-      characterId: 4444,
+      characterId: testCharacterId3,
       hpRatio: 50,
       shieldRatio: 50,
       armorRatio: 50
@@ -161,7 +206,7 @@ contract SmartTurretTest is MudTest {
     SmartTurretTarget memory aggressor = SmartTurretTarget({
       shipId: 1,
       shipTypeId: 1,
-      characterId: 5555,
+      characterId: testCharacterId4,
       hpRatio: 100,
       shieldRatio: 100,
       armorRatio: 100
@@ -169,7 +214,7 @@ contract SmartTurretTest is MudTest {
     SmartTurretTarget memory victim = SmartTurretTarget({
       shipId: 1,
       shipTypeId: 1,
-      characterId: 6666,
+      characterId: testCharacterId5,
       hpRatio: 80,
       shieldRatio: 100,
       armorRatio: 100
@@ -189,11 +234,64 @@ contract SmartTurretTest is MudTest {
       (TargetPriority[])
     );
 
-    assertEq(returnTargetQueue.length, 1, "Target length should equal 1");
+    assertEq(returnTargetQueue.length, 2, "Target length should now equal 2");
+    assertEq(returnTargetQueue[0].weight, 1, "New target is at the beginning of the queue and has weight 1");
+    assertEq(returnTargetQueue[1].weight, 100, "Old target should have shifted down");
   }
 
-  function createAnchorAndOnline(uint256 smartTurretId, address admin) private {
+  function testAggressionFromCorp() public {
+  TargetPriority[] memory priorityQueue = new TargetPriority[](1);
+  Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
+  
+  SmartTurretTarget memory originalTarget = SmartTurretTarget({
+    shipId: 1,
+    shipTypeId: 1,
+    characterId: testCharacterId,
+    hpRatio: 100,
+    shieldRatio: 100,
+    armorRatio: 100
+  });
+  priorityQueue[0] = TargetPriority({ target: originalTarget, weight: 100 });
+
+  // Aggressor from Reapers (98000004)
+  SmartTurretTarget memory aggressor = SmartTurretTarget({
+    shipId: 1,
+    shipTypeId: 1,
+    characterId: testReapersCharacterId, 
+    hpRatio: 100,
+    shieldRatio: 100,
+    armorRatio: 100
+  });
+
+  // any victim
+  SmartTurretTarget memory victim = SmartTurretTarget({
+    shipId: 1,
+    shipTypeId: 1,
+    characterId: 5555,
+    hpRatio: 100,
+    shieldRatio: 100,
+    armorRatio: 100
+  });
+
+  TargetPriority[] memory returnTargetQueue = abi.decode(
+    world.call(
+      systemId,
+      abi.encodeCall(
+        SmartTurretSystem.aggression,
+        (smartTurretId, testCharacterId, priorityQueue, turret, aggressor, victim)
+      )
+    ),
+    (TargetPriority[])
+  );
+
+  // Should remain unchanged if aggressor belongs to a blocked corp (e.g. Reapers)
+  assertEq(returnTargetQueue.length, 1, "Target length should remain 1");
+}
+
+
+  function createAnchorAndOnline(uint256 _smartTurretId, address admin) private {
     //Create and anchor the smart turret and bring online
+    smartTurretId = _smartTurretId;
     smartTurret.createAndAnchorSmartTurret(
       smartTurretId,
       EntityRecordData({ typeId: 7888, itemId: 111, volume: 10 }),
