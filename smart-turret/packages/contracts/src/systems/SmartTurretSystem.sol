@@ -78,7 +78,6 @@ contract SmartTurretSystem is System {
     updatedPriorityQueue = new TargetPriority[](priorityQueue.length + 1);
     for (uint256 i = 0; i < priorityQueue.length; i++) {
       updatedPriorityQueue[i + 1] = priorityQueue[i];
-      return updatedPriorityQueue;
     }
 
     // should the weight be 1? or the heighest of all weights in the array ?
@@ -137,7 +136,6 @@ contract SmartTurretSystem is System {
     updatedPriorityQueue = new TargetPriority[](priorityQueue.length + 1);
     for (uint256 i = 0; i < priorityQueue.length; i++) {
       updatedPriorityQueue[i + 1] = priorityQueue[i];
-      return updatedPriorityQueue;
     }
 
     // should the weight be 1? or the heighest of all weights in the array ?
