@@ -4,3 +4,6 @@
 smart-storage-unit/mprocs.log
 smart-turret/mprocs.log
 smart-gate/mprocs.log
+
+# ignore .env files as we've moved samples to .env.sample
+.env

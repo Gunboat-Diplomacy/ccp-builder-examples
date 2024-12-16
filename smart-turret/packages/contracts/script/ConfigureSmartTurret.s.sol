@@ -17,7 +17,7 @@ contract ConfigureSmartTurret is Script {
 
   SmartTurretLib.World smartTurret;
 
-  function run(address worldAddress) external {
+  function runCore(address worldAddress, uint256[] memory smartTurretIds) internal {
     // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
     uint256 playerPrivateKey = vm.envUint("PRIVATE_KEY");
     vm.startBroadcast(playerPrivateKey);
@@ -26,16 +26,12 @@ contract ConfigureSmartTurret is Script {
     IBaseWorld world = IBaseWorld(worldAddress);
 
     smartTurret = SmartTurretLib.World({
-      iface: IBaseWorld(worldAddress),
+      iface: world,
       namespace: FRONTIER_WORLD_DEPLOYMENT_NAMESPACE
     });
 
     ResourceId systemId = Utils.smartTurretSystemId();
 
-    uint256[] memory smartTurretIds;
-    smartTurretIds[0] = 90751117774793868817432120689828306901801996660537889025505233990272746082187; // Left "So Much For Subtlety"
-    smartTurretIds[1] = 11704671005735439463950973941874644084868982216748564838713575829882117304344; // Middle "Smart Turret Diplomat"
-    smartTurretIds[2] = 49240198130190626126447286418625368499371258892696229807313310414687671817084; // Right "Flexible Demeanour"
 
     for (uint256 i = 0; i < smartTurretIds.length; i++) {
       uint256 smartTurretId = smartTurretIds[i];
@@ -44,5 +40,15 @@ contract ConfigureSmartTurret is Script {
     }
 
     vm.stopBroadcast();
+  }
+
+  function runCQX(address worldAddress) external {
+    uint256[] memory smartTurretIds = new uint256[](3);
+    // scetrov's turrets
+    smartTurretIds[0] = 90751117774793868817432120689828306901801996660537889025505233990272746082187; // Left "So Much For Subtlety"
+    smartTurretIds[1] = 11704671005735439463950973941874644084868982216748564838713575829882117304344; // Middle "Smart Turret Diplomat"
+    smartTurretIds[2] = 49240198130190626126447286418625368499371258892696229807313310414687671817084; // Right "Flexible Demeanour"
+
+    runCore(worldAddress, smartTurretIds);
   }
 }
