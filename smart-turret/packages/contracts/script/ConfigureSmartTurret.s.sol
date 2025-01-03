@@ -44,10 +44,20 @@ contract ConfigureSmartTurret is Script {
 
   function runCQX(address worldAddress) external {
     uint256[] memory smartTurretIds = new uint256[](3);
-    // scetrov's turrets
+    // scetrov's turrets in CQX
     smartTurretIds[0] = 90751117774793868817432120689828306901801996660537889025505233990272746082187; // Left "So Much For Subtlety"
     smartTurretIds[1] = 11704671005735439463950973941874644084868982216748564838713575829882117304344; // Middle "Smart Turret Diplomat"
     smartTurretIds[2] = 49240198130190626126447286418625368499371258892696229807313310414687671817084; // Right "Flexible Demeanour"
+
+    runCore(worldAddress, smartTurretIds);
+  }
+
+  function runKQ2(address worldAddress) external {
+    uint256[] memory smartTurretIds = new uint256[](3);
+    // scetrov's turrets in KQ2
+    smartTurretIds[0] = 101007248819120513958899903992756394077213163393257628645397910844909141821884; // "Funny, It Worked Last Time..."
+    smartTurretIds[1] = 17292464140042949475930706968130229049096333978700120665536192649569581252879; // "Determinist"
+    smartTurretIds[2] = 76754723006344779009578387647831267386579255869101515584726405729330480781176; // "Screw Loose"
 
     runCore(worldAddress, smartTurretIds);
   }

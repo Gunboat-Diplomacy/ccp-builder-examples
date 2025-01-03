@@ -50,7 +50,11 @@ contract SmartTurretTest is MudTest {
   uint256 smartTurretId;
   uint256 testCharacterId = 11111;
   uint256 testReapersCharacterId = 32123;
-  uint256 testCharacterId2 = 33333;
+  uint256 testReapersIICharacterId = 32124;
+  uint256 testReapersIIICharacterId = 32125;
+  uint256 testReapersIVCharacterId = 32126;
+
+  uint256 testCharacterId2 = 22222;
   uint256 testCharacterId3 = 33333;
   uint256 testCharacterId4 = 44444;
   uint256 testCharacterId5 = 55555;
@@ -134,6 +138,33 @@ contract SmartTurretTest is MudTest {
       ""
     );
 
+    smartCharacter.createCharacter(
+      testReapersIICharacterId,
+      address(0x444),
+      98000067, // Reapers II
+      CharacterEntityRecord({ typeId: 123, itemId: 234, volume: 100 }),
+      EntityRecordOffchainTableData({ name: "reaper2Char", dappURL: "none", description: "test" }),
+      ""
+    );
+
+    smartCharacter.createCharacter(
+      testReapersIIICharacterId,
+      address(0x555),
+      98000104, // Reapers III
+      CharacterEntityRecord({ typeId: 123, itemId: 234, volume: 100 }),
+      EntityRecordOffchainTableData({ name: "reaper3Char", dappURL: "none", description: "test" }),
+      ""
+    );
+
+    smartCharacter.createCharacter(
+      testReapersIVCharacterId,
+      address(0x666),
+      98000187, // Reapers IV
+      CharacterEntityRecord({ typeId: 123, itemId: 234, volume: 100 }),
+      EntityRecordOffchainTableData({ name: "reaper4Char", dappURL: "none", description: "test" }),
+      ""
+    );
+
     smartTurretId = vm.envUint("SMART_TURRET_ID");
     createAnchorAndOnline(smartTurretId, admin);
   }
@@ -153,7 +184,7 @@ contract SmartTurretTest is MudTest {
     //Execute inProximity view function and see what it returns
     TargetPriority[] memory priorityQueue = new TargetPriority[](1);
     Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
-    
+
     SmartTurretTarget memory turretTarget = SmartTurretTarget({
       shipId: 1,
       shipTypeId: 1,
@@ -163,7 +194,7 @@ contract SmartTurretTest is MudTest {
       armorRatio: 100
     });
 
-      SmartTurretTarget memory turretTarget2 = SmartTurretTarget({
+    SmartTurretTarget memory turretTarget2 = SmartTurretTarget({
       shipId: 2,
       shipTypeId: 2,
       characterId: testCharacterId2,
@@ -191,8 +222,58 @@ contract SmartTurretTest is MudTest {
     assertEq(returnTargetQueue[1].weight, 100, "Old target should have shifted down");
   }
 
+  function testReapersIInProximity() public {
+    _testImmuneCharacterInProximity(testReapersCharacterId);
+  }
+
+  function testReapersIIInProximity() public {
+    _testImmuneCharacterInProximity(testReapersIICharacterId);
+  }
+
+  function testReapersIIIInProximity() public {
+    _testImmuneCharacterInProximity(testReapersIIICharacterId);
+  }
+
+  function testReapersIVInProximity() public {
+    _testImmuneCharacterInProximity(testReapersIVCharacterId);
+  }
+
+  //Test inProximity
+  function _testImmuneCharacterInProximity(uint256 characterId) private {
+    //Execute inProximity view function and see what it returns
+    TargetPriority[] memory priorityQueue = new TargetPriority[](1);
+    Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
+
+    SmartTurretTarget memory turretTarget = SmartTurretTarget({
+      shipId: 1,
+      shipTypeId: 1,
+      characterId: characterId,
+      hpRatio: 100,
+      shieldRatio: 100,
+      armorRatio: 100
+    });
+
+    priorityQueue[0] = TargetPriority({ target: turretTarget, weight: 100 });
+
+    assertEq(priorityQueue.length, 1, "Target length is 1.");
+
+    //Run inProximity
+    TargetPriority[] memory returnTargetQueue = abi.decode(
+      world.call(
+        systemId,
+        abi.encodeCall(
+          SmartTurretSystem.inProximity,
+          (smartTurretId, testCharacterId, priorityQueue, turret, turretTarget)
+        )
+      ),
+      (TargetPriority[])
+    );
+
+    assertEq(returnTargetQueue.length, 1, "Target length is unchanged.");
+  }
+
   //Test aggression
-  function testAggression() public {    
+  function testAggression() public {
     TargetPriority[] memory priorityQueue = new TargetPriority[](1);
     Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
     SmartTurretTarget memory turretTarget = SmartTurretTarget({
@@ -240,54 +321,53 @@ contract SmartTurretTest is MudTest {
   }
 
   function testAggressionFromCorp() public {
-  TargetPriority[] memory priorityQueue = new TargetPriority[](1);
-  Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
-  
-  SmartTurretTarget memory originalTarget = SmartTurretTarget({
-    shipId: 1,
-    shipTypeId: 1,
-    characterId: testCharacterId,
-    hpRatio: 100,
-    shieldRatio: 100,
-    armorRatio: 100
-  });
-  priorityQueue[0] = TargetPriority({ target: originalTarget, weight: 100 });
+    TargetPriority[] memory priorityQueue = new TargetPriority[](1);
+    Turret memory turret = Turret({ weaponTypeId: 1, ammoTypeId: 1, chargesLeft: 100 });
 
-  // Aggressor from Reapers (98000004)
-  SmartTurretTarget memory aggressor = SmartTurretTarget({
-    shipId: 1,
-    shipTypeId: 1,
-    characterId: testReapersCharacterId, 
-    hpRatio: 100,
-    shieldRatio: 100,
-    armorRatio: 100
-  });
+    SmartTurretTarget memory originalTarget = SmartTurretTarget({
+      shipId: 1,
+      shipTypeId: 1,
+      characterId: testCharacterId,
+      hpRatio: 100,
+      shieldRatio: 100,
+      armorRatio: 100
+    });
+    priorityQueue[0] = TargetPriority({ target: originalTarget, weight: 100 });
 
-  // any victim
-  SmartTurretTarget memory victim = SmartTurretTarget({
-    shipId: 1,
-    shipTypeId: 1,
-    characterId: 5555,
-    hpRatio: 100,
-    shieldRatio: 100,
-    armorRatio: 100
-  });
+    // Aggressor from Reapers (98000004)
+    SmartTurretTarget memory aggressor = SmartTurretTarget({
+      shipId: 1,
+      shipTypeId: 1,
+      characterId: testReapersCharacterId,
+      hpRatio: 100,
+      shieldRatio: 100,
+      armorRatio: 100
+    });
 
-  TargetPriority[] memory returnTargetQueue = abi.decode(
-    world.call(
-      systemId,
-      abi.encodeCall(
-        SmartTurretSystem.aggression,
-        (smartTurretId, testCharacterId, priorityQueue, turret, aggressor, victim)
-      )
-    ),
-    (TargetPriority[])
-  );
+    // any victim
+    SmartTurretTarget memory victim = SmartTurretTarget({
+      shipId: 1,
+      shipTypeId: 1,
+      characterId: 5555,
+      hpRatio: 100,
+      shieldRatio: 100,
+      armorRatio: 100
+    });
 
-  // Should remain unchanged if aggressor belongs to a blocked corp (e.g. Reapers)
-  assertEq(returnTargetQueue.length, 1, "Target length should remain 1");
-}
+    TargetPriority[] memory returnTargetQueue = abi.decode(
+      world.call(
+        systemId,
+        abi.encodeCall(
+          SmartTurretSystem.aggression,
+          (smartTurretId, testCharacterId, priorityQueue, turret, aggressor, victim)
+        )
+      ),
+      (TargetPriority[])
+    );
 
+    // Should remain unchanged if aggressor belongs to a blocked corp (e.g. Reapers)
+    assertEq(returnTargetQueue.length, 1, "Target length should remain 1");
+  }
 
   function createAnchorAndOnline(uint256 _smartTurretId, address admin) private {
     //Create and anchor the smart turret and bring online
@@ -297,9 +377,9 @@ contract SmartTurretTest is MudTest {
       EntityRecordData({ typeId: 7888, itemId: 111, volume: 10 }),
       SmartObjectData({ owner: admin, tokenURI: "test" }),
       WorldPosition({ solarSystemId: 1, position: Coord({ x: 1, y: 1, z: 1 }) }),
-      1e18,            // fuelUnitVolume,
-      1,               // fuelConsumptionPerMinute,
-      1000000 * 1e18   // fuelMaxCapacity,
+      1e18, // fuelUnitVolume,
+      1, // fuelConsumptionPerMinute,
+      1000000 * 1e18 // fuelMaxCapacity,
     );
 
     // check global state and resume if needed

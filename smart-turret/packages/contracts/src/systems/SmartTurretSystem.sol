@@ -47,22 +47,8 @@ contract SmartTurretSystem is System {
     uint256 turretTargetCorp = CharactersTable.getCorpId(turretTarget.characterId);
     uint256 smartTurretOwnerCorp = CharactersTable.getCorpId(characterId);
 
-    if (turretTargetCorp == 98000004) {
+    if (isReapersCorp(turretTargetCorp)) {
       // Reapers
-      // do not add to targeting
-      updatedPriorityQueue = priorityQueue;
-      return updatedPriorityQueue;
-    }
-
-    if (turretTargetCorp == 98000067) {
-      // Reapers II
-      // do not add to targeting
-      updatedPriorityQueue = priorityQueue;
-      return updatedPriorityQueue;
-    }
-
-    if (turretTargetCorp == 98000104) {
-      // Reapers III
       // do not add to targeting
       updatedPriorityQueue = priorityQueue;
       return updatedPriorityQueue;
@@ -105,22 +91,7 @@ contract SmartTurretSystem is System {
     uint256 agressorCorp = CharactersTable.getCorpId(aggressor.characterId);
     uint256 smartTurretOwnerCorp = CharactersTable.getCorpId(characterId);
 
-    if (agressorCorp == 98000004) {
-      // Reapers
-      // do not add to targeting
-      updatedPriorityQueue = priorityQueue;
-      return updatedPriorityQueue;
-    }
-
-    if (agressorCorp == 98000067) {
-      // Reapers II
-      // do not add to targeting
-      updatedPriorityQueue = priorityQueue;
-      return updatedPriorityQueue;
-    }
-
-    if (agressorCorp == 98000104) {
-      // Reapers III
+    if (isReapersCorp(agressorCorp)) {
       // do not add to targeting
       updatedPriorityQueue = priorityQueue;
       return updatedPriorityQueue;
@@ -141,6 +112,30 @@ contract SmartTurretSystem is System {
     // should the weight be 1? or the heighest of all weights in the array ?
     updatedPriorityQueue[0] = TargetPriority({ target: aggressor, weight: 1 });
     return updatedPriorityQueue;
+  }
+
+  function isReapersCorp(uint256 targetCorp) internal pure returns (bool) {
+    if (targetCorp == 98000004) {
+      // Reapers
+      return true;
+    }
+
+    if (targetCorp == 98000067) {
+      // Reapers II
+      return true;
+    }
+
+    if (targetCorp == 98000104) {
+      // Reapers III
+      return true;
+    }
+
+    if (targetCorp == 98000187) {
+      // Reapers IV
+      return true;
+    }
+
+    return false;
   }
 
   function _namespace() internal pure returns (bytes14 namespace) {
