@@ -29,6 +29,15 @@ contract SmartTurretSystem is System {
   using SmartDeployableUtils for bytes14;
   using SmartCharacterUtils for bytes14;
 
+  function isCeasefire(uint256 timestamp) public returns (bool) {
+    uint256 startTime = 1738281600; // Fri Jan 31 2025 00:00:00 GMT+0000
+    uint256 endTime = 1738454399; // Sat Feb 01 2025 23:59:59 GMT+0000
+
+    if (timestamp > startTime && timestamp < endTime) {
+      return true;
+    }
+  }
+
   /**
    * @dev a function to implement logic for smart turret based on proximity
    * @param smartTurretId The smart turret id
@@ -46,6 +55,11 @@ contract SmartTurretSystem is System {
   ) public returns (TargetPriority[] memory updatedPriorityQueue) {
     uint256 turretTargetCorp = CharactersTable.getCorpId(turretTarget.characterId);
     uint256 smartTurretOwnerCorp = CharactersTable.getCorpId(characterId);
+
+    if (isCeasefire(block.timestamp)) {
+      updatedPriorityQueue = priorityQueue;
+      return updatedPriorityQueue;
+    }
 
     if (isReapersCorp(turretTargetCorp)) {
       // Reapers

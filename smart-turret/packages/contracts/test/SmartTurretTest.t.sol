@@ -369,6 +369,36 @@ contract SmartTurretTest is MudTest {
     assertEq(returnTargetQueue.length, 1, "Target length should remain 1");
   }
 
+  function testBeforeCeasefire() public {
+    uint256 testTime = 1738163233; // Wed Jan 29 2025 15:07:13 GMT+0000
+    bool result = abi.decode(world.call(systemId, abi.encodeCall(SmartTurretSystem.isCeasefire, (testTime))), (bool));
+    assertFalse(result);
+  }
+
+  function testEarlyBoundryOfCeasefire() public {
+    uint256 testTime = 1738281660; // Fri Jan 31 2025 00:01:00 GMT+0000
+    bool result = abi.decode(world.call(systemId, abi.encodeCall(SmartTurretSystem.isCeasefire, (testTime))), (bool));
+    assertTrue(result);
+  }
+
+  function testMidpointOfCeasefire() public {
+    uint256 testTime = 1738368000; // Sat Feb 01 2025 00:00:00 GMT+0000
+    bool result = abi.decode(world.call(systemId, abi.encodeCall(SmartTurretSystem.isCeasefire, (testTime))), (bool));
+    assertTrue(result);
+  }
+
+  function testLateBoundryOfCeasefire() public {
+    uint256 testTime = 1738454280; // Sat Feb 01 2025 23:58:00 GMT+0000
+    bool result = abi.decode(world.call(systemId, abi.encodeCall(SmartTurretSystem.isCeasefire, (testTime))), (bool));
+    assertTrue(result);
+  }
+
+  function testAfterCeasefire() public {
+    uint256 testTime = 1738454460; // Sat Feb 01 2025 23:58:00 GMT+0000
+    bool result = abi.decode(world.call(systemId, abi.encodeCall(SmartTurretSystem.isCeasefire, (testTime))), (bool));
+    assertFalse(result);
+  }
+
   function createAnchorAndOnline(uint256 _smartTurretId, address admin) private {
     //Create and anchor the smart turret and bring online
     smartTurretId = _smartTurretId;
